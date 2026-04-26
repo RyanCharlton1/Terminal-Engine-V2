@@ -1,0 +1,75 @@
+#include "engine/context.h"
+#include "engine/colour.h"
+
+#include <stdlib.h>
+#include <string.h>
+
+void init_context(context* cont, int width, int height) {
+    cont->width  = width;
+    cont->height = height;
+
+    // The max length string to encode a single char, terminator counts as 
+    // char itself
+    const char max_char[] = "\e[38;2;255;255;255m";
+
+    cont->colour_buffer = (RGB*)malloc(width * height * sizeof(RGB));
+    cont->depth_buffer  = (float*)malloc(width * height * sizeof(float));
+    cont->char_buffer   = (char*)malloc(width * height * sizeof(max_char) + 1);
+
+    if (!cont->colour_buffer || !cont->depth_buffer || !cont->char_buffer) 
+        fprintf(stderr, "malloc failed: init_context\n");
+
+    // TODO: Set terminal size to context resolution
+}
+
+void clear_context(context* cont) {
+    if (cont->colour_buffer) { free(cont->colour_buffer); }
+    if (cont->depth_buffer)  { free(cont->depth_buffer);  }
+    if (cont->char_buffer)   { free(cont->char_buffer);   }
+}
+
+void print_context(context* cont) {
+    char *char_buffer_ptr = cont->char_buffer;
+
+    char buffer[64];
+    cont->char_buffer[0] = '\0';
+
+    int n = 0;
+    for (int i = 0; i < cont->width * cont->height; i++) {
+        // Brighter colours will have a fuller ASCII char
+        RGB rgb = cont->colour_buffer[i];
+        char c = RGB_pixel(rgb); 
+
+        int write_len = sprintf(char_buffer_ptr, "\e[38;2;%hhu;%hhu;%hhum%c",
+            rgb.r, rgb.g, rgb.b, c);
+           
+        char_buffer_ptr += write_len;
+    }
+
+    printf(cont->char_buffer);
+}
+
+void print_context16(context* cont) {
+
+    for (int i = 0; i < cont->width * cont->height; i++) {
+         if (i % cont->width == 0) { printf("\n"); }
+        // Brighter colours will have a fuller pixel ASCII char
+        RGB rgb = cont->colour_buffer[i];
+        char c = RGB_pixel(rgb); 
+
+        colour16 colour = RGB_colour16(rgb);
+
+        printf("\e[%hhum%c", colour, c);
+    }
+}
+
+void print_contextbw(context* cont) {
+
+    for (int i = 0; i < cont->width * cont->height; i++) {
+        // Brighter colours will have a fuller pixel ASCII char
+        RGB rgb = cont->colour_buffer[i];
+        char c = RGB_pixel(rgb); 
+
+        printf("%c", c);
+    }
+}
