@@ -5,12 +5,20 @@
 
 #include "cglm/cglm.h"
 
+#define RESET_COLOUR_ESCAPE   "\e[0m"
 #define RESET_CURSOR_ESCAPE   "\e[H"
-#define DISABLE_CURSOR_ESCAPE "\e[?25l"
 #define ENABLE_CURSOR_ESCAPE  "\e[?25h"
+#define DISABLE_CURSOR_ESCAPE "\e[?25l"
+
+typedef enum {
+    TRUECOLOUR,
+    REDUCEDCOLOUR,
+    BWCOLOUR
+} colour_depth;
 
 typedef struct _context{
     int width, height;
+    colour_depth depth;
 
     RGB   *colour_buffer;
     float *depth_buffer;
@@ -20,14 +28,15 @@ typedef struct _context{
     char *char_buffer;
 } context;
 
-// TODO: decide if context should be entirely dynamically allocated
-void init_context(context* cont, int width, int height);
-void free_context(context* cont);
+context* init_context(int width, int height, colour_depth depth);
+void     free_context(context* cont);
 
+void wipe_buffers(context* cont);
 void wipe_depth_buffer(context* cont);
 void wipe_colour_buffer(context* cont);
 
 void print_context(context* cont);
+void print_contexttr(context* cont);
 void print_context16(context* cont);
 void print_contextbw(context* cont);
 

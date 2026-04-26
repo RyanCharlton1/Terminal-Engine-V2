@@ -5,9 +5,14 @@
 #include <string.h>
 #include <float.h>
 
-void init_context(context* cont, int width, int height) {
+context* init_context(int width, int height, colour_depth depth) {
+    context* cont = (context*)malloc(sizeof(context));
+
+    if (!cont) { printf("malloc failed: init_context\n"); return NULL; }
+
     cont->width  = width;
     cont->height = height;
+    cont->depth  = depth;
 
     // The max length string to encode a single char, terminator counts as 
     // char itself
@@ -21,12 +26,19 @@ void init_context(context* cont, int width, int height) {
         fprintf(stderr, "malloc failed: init_context\n");
 
     // TODO: Set terminal size to context resolution
+
+    return cont;
 }
 
 void free_context(context* cont) {
     if (cont->colour_buffer) { free(cont->colour_buffer); }
     if (cont->depth_buffer)  { free(cont->depth_buffer);  }
     if (cont->char_buffer)   { free(cont->char_buffer);   }
+}
+
+void wipe_buffers(context* cont) {
+    wipe_depth_buffer(cont);
+    wipe_colour_buffer(cont);
 }
 
 void wipe_depth_buffer(context* cont) {
@@ -39,6 +51,14 @@ void wipe_colour_buffer(context* cont) {
 }
 
 void print_context(context* cont) {
+    switch (cont->depth) {
+        case TRUECOLOUR:    print_contexttr(cont); return;
+        case REDUCEDCOLOUR: print_context16(cont); return;
+        default:            print_contextbw(cont); return;
+    }
+}
+
+void print_contexttr(context* cont) {
     char *char_buffer_ptr = cont->char_buffer;
 
     char buffer[64];
@@ -56,6 +76,7 @@ void print_context(context* cont) {
         char_buffer_ptr += write_len;
     }
 
+    printf(RESET_CURSOR_ESCAPE); // Set cursor to overwrite last frame
     printf(cont->char_buffer);
 }
 
