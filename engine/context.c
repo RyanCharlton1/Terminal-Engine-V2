@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <float.h>
 
 void init_context(context* cont, int width, int height) {
     cont->width  = width;
@@ -22,10 +23,19 @@ void init_context(context* cont, int width, int height) {
     // TODO: Set terminal size to context resolution
 }
 
-void clear_context(context* cont) {
+void free_context(context* cont) {
     if (cont->colour_buffer) { free(cont->colour_buffer); }
     if (cont->depth_buffer)  { free(cont->depth_buffer);  }
     if (cont->char_buffer)   { free(cont->char_buffer);   }
+}
+
+void wipe_depth_buffer(context* cont) {
+    for (int i = 0; i < cont->height * cont->width; i++)
+        cont->depth_buffer[i] = FLT_MAX;
+}
+
+void wipe_colour_buffer(context* cont) {
+    memset(cont->colour_buffer, 0, cont->width * cont->height * sizeof(RGB));
 }
 
 void print_context(context* cont) {
@@ -72,4 +82,11 @@ void print_contextbw(context* cont) {
 
         printf("%c", c);
     }
+}
+
+// Screen space is 0 -> width and 0 -> height with top left as (0,0)
+// Inputs are expected to be in space -1 -> 1 
+void screenspace(context* cont, vec2 in, vec2 out) {
+    out[0] = (in[0] + 1.0f) / 2.0f * cont->width;
+    out[1] = (-in[1] + 1.0f) / 2.0f * cont->height;
 }

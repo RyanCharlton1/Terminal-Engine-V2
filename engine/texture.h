@@ -3,6 +3,8 @@
 
 #include "engine/colour.h"
 
+#include "cglm/cglm.h"
+
 #include <stdlib.h>
 
 typedef struct _texture {
@@ -15,6 +17,6 @@ texture* init_texture(const char* path);
 void     free_texture(texture* t);
 
 RGB sample(texture* t, int x, int y);
-RGB sampleuv(texture *t, float u, float v);
+RGB sampleuv(texture *t, vec2 uv);
 
 #endif

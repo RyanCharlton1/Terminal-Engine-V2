@@ -35,7 +35,7 @@ RGB sample(texture* t, int x, int y) {
     return t->data[y * t->width + x];
 }
 
-RGB sampleuv(texture* t, float u,  float v) {
-    return sample(t, (t->width - 1) * u, (t->height - 1) * v);
+RGB sampleuv(texture* t, vec2 uv) {
+    return sample(t, (t->width - 1) * uv[0], (t->height - 1) * uv[1]);
 }
 
