@@ -43,7 +43,7 @@ void wipe_buffers(context* cont) {
 
 void wipe_depth_buffer(context* cont) {
     for (int i = 0; i < cont->height * cont->width; i++)
-        cont->depth_buffer[i] = FLT_MAX;
+        cont->depth_buffer[i] = 1.0f;
 }
 
 void wipe_colour_buffer(context* cont) {

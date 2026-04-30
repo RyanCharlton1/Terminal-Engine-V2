@@ -42,6 +42,11 @@ int inside_triangle(float alpha, float beta, float gamma) {
 }
 
 void rasterise(triangle* t, context* cont, texture* text) {
+    // If w value in NDC is negative vertex is offscreen
+    // TODO: salvage if there is a vertex on screen 
+    if (t->left.pos[3] < 0.0 || t->top.pos[3] < 0.0 || t->right.pos[3] < 0.0)
+        return;
+
     // Divide by w component used in perspective calc
     vec3 div_left, div_top, div_right;
 
@@ -88,10 +93,7 @@ void rasterise(triangle* t, context* cont, texture* text) {
                 // negative z direction is forward in the world, after 
                 // perspective projection, negative z is behind camera
 
-                // If negative depth(behind camera) discard
-                if (depth < 0.0f) { continue; }
-
-                // If not closer than depth buffer value, discard
+                // 0 in NDC is near plane, 1 is far plane. Discard if further
                 if (cont->depth_buffer[y * cont->width + x] < depth)
                     continue;
 
