@@ -4,8 +4,9 @@
 #include "cglm/cglm.h"
 
 typedef struct _camera {
-    float yaw, pitch, roll;
-    float x, y, z;
+    vec3 pos;
+    vec3 dir;
+    vec3 up;
 } camera;
 
 camera* init_camera();

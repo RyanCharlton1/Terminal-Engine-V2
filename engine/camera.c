@@ -8,6 +8,10 @@ camera* init_camera() {
 
     if (!out) { printf("malloc failed: init_camera\n"); return NULL; }
 
+    out->pos[0] = 0.0f; out->pos[1] = 0.0f; out->pos[2] =  0.0f;
+    out->dir[0] = 0.0f; out->dir[1] = 0.0f; out->dir[2] = -1.0f;
+    out->up[0]  = 0.0f; out->up[1]  = 1.0f; out->up[2] =  0.0f;
+
     return out;
 }
 
@@ -16,11 +20,8 @@ void free_camera(camera* c) {
 }
 
 void camera_view(camera* c, mat4 out) {
-    vec3 inverse_rot   = { -c->pitch, -c->yaw, -c->roll };
-    vec3 inverse_trans = { -c->x,     -c->y,   -c->z    };
+    vec3 looking_at;
 
-    mat4 trans_m, rot_m;
-    glm_translate_make(trans_m, inverse_trans);
-    glm_euler_yxz((float*)inverse_rot, rot_m); 
-    glm_mat4_mul(trans_m, rot_m, out);
+    glm_vec3_add(c->pos, c->dir, looking_at);
+    glm_lookat(c->pos, looking_at, c->up, out);
 }

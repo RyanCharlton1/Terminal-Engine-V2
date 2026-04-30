@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define WIDTH 120
+#define WIDTH  120
 #define HEIGHT 40
 
 texture* skull_text  = NULL;
@@ -35,10 +35,14 @@ void free_resources(engine* self) {
 }
 
 void logic(double frame_time, engine* self) {
-    if (self->keys['W']) { self->current_camera->z -= 1.0 * frame_time; }
-    if (self->keys['S']) { self->current_camera->z += 1.0 * frame_time; }
-    if (self->keys['A']) { self->current_camera->yaw += 1.0 * frame_time; }
-    if (self->keys['D']) { self->current_camera->yaw -= 1.0 * frame_time; }
+    camera *cam = self->current_camera;
+
+    // if (self->keys['W']) { cam->pos[2] -= 1.0 * frame_time; }
+    // if (self->keys['S']) { cam->pos[2] += 1.0 * frame_time; }
+    if (self->keys['W']) { glm_vec3_muladds(cam->dir,  frame_time, cam->pos); }
+    if (self->keys['S']) { glm_vec3_muladds(cam->dir, -frame_time, cam->pos); }
+    if (self->keys['A']) { glm_vec3_rotate(cam->dir,  frame_time, cam->up); }
+    if (self->keys['D']) { glm_vec3_rotate(cam->dir, -frame_time, cam->up); }
     if (self->keys['K']) { self->running = 0; } // Quit
     // self->current_camera->yaw += 1.0 * frame_time;
 }
