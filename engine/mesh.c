@@ -1,7 +1,9 @@
 #include "engine/mesh.h"
 #include "engine/util.h"
 
-triangle transform(mat4 trans, triangle* src) {
+#include <string.h>
+
+triangle apply_transform(mat4 trans, triangle* src) {
     triangle dst;
     
     // Retain uv coords
@@ -42,7 +44,7 @@ int inside_triangle(float alpha, float beta, float gamma) {
 }
 
 void rasterise(triangle* t, context* cont, texture* text) {
-    // If w value in NDC is negative vertex is offscreen
+    // If w value in NDC is negative vertex is behind screen
     // TODO: salvage if there is a vertex on screen 
     if (t->left.pos[3] < 0.0 || t->top.pos[3] < 0.0 || t->right.pos[3] < 0.0)
         return;
@@ -108,5 +110,40 @@ void rasterise(triangle* t, context* cont, texture* text) {
                 cont->colour_buffer[y * cont-> width + x] = sampleuv(text, uv);
             }
         }
+    }
+}
+
+mesh* init_mesh() {
+    mesh* out = (mesh*)malloc(sizeof(mesh));
+
+    if (!out) { fprintf(stderr, "malloc failed: init_mesh\n"); return NULL; }
+
+    memset(out, 0, sizeof(mesh));
+    out->trans.scale[0] = 1.0f;
+    out->trans.scale[1] = 1.0f;
+    out->trans.scale[2] = 1.0f;
+
+    return out;
+}
+
+void free_mesh(mesh* m) {
+    free(m);
+}
+
+void draw_mesh(mesh *m, context *cont, camera* cam) {
+    mat4 proj, view, model;
+
+    glm_perspective_default((float)WIDTH / (float)HEIGHT, proj);
+    camera_view(cam, view);
+    transform_mat4(model, &m->trans);
+
+    for (int i = 0; i < m->model_size; i++) {
+        triangle t = m->tris[i];
+
+        triangle model_t = apply_transform(model, &t);
+        triangle view_t  = apply_transform(view, &model_t);
+        triangle proj_t  = apply_transform(proj, &view_t);
+
+        rasterise(&proj_t, cont, m->text);
     }
 }

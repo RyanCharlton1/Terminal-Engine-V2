@@ -119,9 +119,9 @@ void poll_input(engine* self) {
 #ifdef _WIN32
     for (int i = 0; i < KEY_COUNT; i++) {
         if (GetKeyState(i) & 0x8000) { 
-            if (e->keys[i]) { e->keys[i] = HELD; } 
-            else            { e->keys[i] = PRESSED; }
-        } else { e->keys[i] = RELEASED; }
+            if (self->keys[i]) { self->keys[i] = HELD;    } 
+            else               { self->keys[i] = PRESSED; }
+        } else { self->keys[i] = RELEASED; }
     }
 #else
 

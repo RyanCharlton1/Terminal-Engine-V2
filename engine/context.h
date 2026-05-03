@@ -10,6 +10,10 @@
 #define ENABLE_CURSOR_ESCAPE  "\e[?25h"
 #define DISABLE_CURSOR_ESCAPE "\e[?25l"
 
+#define WIDTH  120
+#define HEIGHT 40
+
+
 typedef enum {
     TRUECOLOUR,
     REDUCEDCOLOUR,

@@ -3,6 +3,8 @@
 
 #include "engine/context.h"
 #include "engine/texture.h"
+#include "engine/transform.h"
+#include "engine/camera.h"
 
 #include "cglm/cglm.h"
 
@@ -17,7 +19,7 @@ typedef struct _triangle {
     vertex right;
 } triangle;
 
-triangle transform(mat4 trans, triangle* src);
+triangle apply_transform(mat4 trans, triangle* src);
 
 // Find the distance of p from edge ab propotional to |ab|, the sign of which
 // tells what side of the edge p falls on 
@@ -38,9 +40,21 @@ int inside_triangle(float alpha, float beta, float gamma);
 
 void rasterise(triangle* t, context* cont, texture* text);
 
+// model and texture are shared resources that need to managed separately
+// multiple meshes may reuse the same textures or models
 typedef struct _mesh {
     triangle* tris;
     texture*  text;
+
+    unsigned int model_size;
+
+    transform trans;
 } mesh;
+
+mesh* init_mesh();
+void  free_mesh(mesh* m);
+
+// Apply transformations to mesh and draw to cont
+void draw_mesh(mesh *m, context *cont, camera* cam);
 
 #endif
