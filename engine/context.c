@@ -5,6 +5,12 @@
 #include <string.h>
 #include <float.h>
 
+#ifdef __linux__
+
+#include <unistd.h> 
+
+#endif
+
 context* init_context(int width, int height, colour_depth depth) {
     context* cont = (context*)malloc(sizeof(context));
 
@@ -24,6 +30,10 @@ context* init_context(int width, int height, colour_depth depth) {
 
     if (!cont->colour_buffer || !cont->depth_buffer || !cont->char_buffer) 
         fprintf(stderr, "malloc failed: init_context\n");
+
+#ifdef _WIN32
+    cont->hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+#endif
 
     // TODO: Set terminal size to context resolution
 
@@ -52,10 +62,31 @@ void wipe_colour_buffer(context* cont) {
 
 void print_context(context* cont) {
     switch (cont->depth) {
-        case TRUECOLOUR:    print_contexttr(cont); return;
-        case REDUCEDCOLOUR: print_context16(cont); return;
-        default:            print_contextbw(cont); return;
+        case TRUECOLOUR:    print_contexttr(cont); break;
+        case REDUCEDCOLOUR: print_context16(cont); break;
+        default:            print_contextbw(cont); break;
     }
+
+    // Using printf makes many CLR and win api calls on Windows. Directly using
+    // lower level APIs massively increases FPS 
+#ifdef _WIN32
+    WriteFile(
+        cont->hStdout, 
+        RESET_CURSOR_ESCAPE, 
+        sizeof(RESET_CURSOR_ESCAPE), 
+        NULL, 
+        NULL);
+
+    WriteFile(
+        cont->hStdout, 
+        cont->char_buffer, 
+        cont->char_buffer_size, 
+        NULL, 
+        NULL);
+#else
+    write(STDOUT_FILENO, RESET_CURSOR_ESCAPE, sizeof(RESET_CURSOR_ESCAPE));
+    write(STDOUT_FILENO, cont->char_buffer, cont->char_buffer_size);
+#endif  
 }
 
 void print_contexttr(context* cont) {
@@ -73,8 +104,7 @@ void print_contexttr(context* cont) {
         char_buffer_ptr += write_len;
     }
 
-    printf(RESET_CURSOR_ESCAPE); // Set cursor to overwrite last frame
-    printf(cont->char_buffer);
+    cont->char_buffer_size = char_buffer_ptr - cont->char_buffer;
 }
 
 void print_context16(context* cont) {
@@ -93,8 +123,7 @@ void print_context16(context* cont) {
         char_buffer_ptr += write_len;
     }
 
-    printf(RESET_CURSOR_ESCAPE); // Set cursor to overwrite last frame
-    printf(cont->char_buffer);
+    cont->char_buffer_size = char_buffer_ptr - cont->char_buffer;
 }
 
 void print_contextbw(context* cont) {
@@ -109,15 +138,12 @@ void print_contextbw(context* cont) {
         char_buffer_ptr++;
     }
 
-    *char_buffer_ptr = '\0';
-
-    printf(RESET_CURSOR_ESCAPE); // Set cursor to overwrite last frame
-    printf(cont->char_buffer);
+    cont->char_buffer_size = cont->width * cont->height;
 }
 
 // Screen space is 0 -> width and 0 -> height with top left as (0,0)
 // Inputs are expected to be in space -1 -> 1 
 void screenspace(context* cont, vec2 in, vec2 out) {
-    out[0] = (in[0] + 1.0f) / 2.0f * cont->width;
+    out[0] = ( in[0] + 1.0f) / 2.0f * cont->width;
     out[1] = (-in[1] + 1.0f) / 2.0f * cont->height;
 }

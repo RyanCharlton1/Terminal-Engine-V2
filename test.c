@@ -73,7 +73,7 @@ int main() {
     print_target_os();
     engine* e = init_engine(WIDTH, HEIGHT, TRUECOLOUR);
 
-    e->current_context->depth = BWCOLOUR;
+    // e->current_context->depth = BWCOLOUR;
 
     e->init_resources = init_resources; 
     e->free_resources = free_resources; 
