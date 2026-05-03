@@ -60,11 +60,8 @@ void print_context(context* cont) {
 
 void print_contexttr(context* cont) {
     char *char_buffer_ptr = cont->char_buffer;
-
-    char buffer[64];
     cont->char_buffer[0] = '\0';
 
-    int n = 0;
     for (int i = 0; i < cont->width * cont->height; i++) {
         // Brighter colours will have a fuller ASCII char
         RGB rgb = cont->colour_buffer[i];
@@ -81,28 +78,41 @@ void print_contexttr(context* cont) {
 }
 
 void print_context16(context* cont) {
+    char *char_buffer_ptr = cont->char_buffer;
+    cont->char_buffer[0] = '\0';
 
     for (int i = 0; i < cont->width * cont->height; i++) {
-         if (i % cont->width == 0) { printf("\n"); }
         // Brighter colours will have a fuller pixel ASCII char
         RGB rgb = cont->colour_buffer[i];
         char c = RGB_pixel(rgb); 
 
         colour16 colour = RGB_colour16(rgb);
 
-        printf("\e[%hhum%c", colour, c);
+        int write_len = sprintf(char_buffer_ptr, "\e[%hhum%c", colour, c);
+
+        char_buffer_ptr += write_len;
     }
+
+    printf(RESET_CURSOR_ESCAPE); // Set cursor to overwrite last frame
+    printf(cont->char_buffer);
 }
 
 void print_contextbw(context* cont) {
+    char *char_buffer_ptr = cont->char_buffer;
 
     for (int i = 0; i < cont->width * cont->height; i++) {
         // Brighter colours will have a fuller pixel ASCII char
         RGB rgb = cont->colour_buffer[i];
         char c = RGB_pixel(rgb); 
 
-        printf("%c", c);
+        *char_buffer_ptr = c;
+        char_buffer_ptr++;
     }
+
+    *char_buffer_ptr = '\0';
+
+    printf(RESET_CURSOR_ESCAPE); // Set cursor to overwrite last frame
+    printf(cont->char_buffer);
 }
 
 // Screen space is 0 -> width and 0 -> height with top left as (0,0)
