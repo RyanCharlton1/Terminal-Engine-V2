@@ -14,7 +14,10 @@
 context* init_context(int width, int height, colour_depth depth) {
     context* cont = (context*)malloc(sizeof(context));
 
-    if (!cont) { printf("malloc failed: init_context\n"); return NULL; }
+    if (!cont) { 
+        fprintf(stderr, "malloc failed: init_context\n"); 
+        return NULL; 
+    }
 
     cont->width  = width;
     cont->height = height;
@@ -44,6 +47,7 @@ void free_context(context* cont) {
     if (cont->colour_buffer) { free(cont->colour_buffer); }
     if (cont->depth_buffer)  { free(cont->depth_buffer);  }
     if (cont->char_buffer)   { free(cont->char_buffer);   }
+    free(cont);
 }
 
 void wipe_buffers(context* cont) {

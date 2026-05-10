@@ -8,6 +8,8 @@
 #include <stdlib.h>
 
 typedef struct _texture {
+    char *name;
+
     unsigned int width, height, channels;
 
     RGB* data;
@@ -15,6 +17,7 @@ typedef struct _texture {
 
 texture* init_texture(const char* path);
 void     free_texture(texture* t);
+void     load_texture(const char* path, texture *t);
 
 RGB sample(texture* t, int x, int y);
 RGB sampleuv(texture *t, vec2 uv);

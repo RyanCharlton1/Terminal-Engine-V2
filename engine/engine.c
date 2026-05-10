@@ -52,13 +52,11 @@ int find_keyboard_fd() {
 
 #endif
 
-// malloc engine and init key structs 
+// Allocate engine and init key structs 
 engine* init_engine(int width, int height, colour_depth depth) {
-    engine* e = (engine*)malloc(sizeof(engine));
+    engine* e = (engine*)calloc(1, sizeof(engine));
 
-    if (!e) { printf("malloc failed: init_engine\n"); return NULL; }
-
-    memset(e, 0, sizeof(engine));
+    if (!e) { fprintf(stderr, "calloc failed: init_engine\n"); return NULL; }
 
     e->current_context = init_context(width, height, depth); 
     e->current_camera  = init_camera();
@@ -68,7 +66,7 @@ engine* init_engine(int width, int height, colour_depth depth) {
 
 void free_engine(engine* e) {
     if (e->current_context) { free_context(e->current_context); }
-    if (e->current_camera)  { free_camera(e->current_context); }
+    if (e->current_camera)  { free_camera(e->current_camera);   }
     free(e);
 }
 
@@ -161,7 +159,8 @@ void poll_input(engine* self) {
             case KEY_V: self->keys['V'] = new_state; break;
             case KEY_B: self->keys['B'] = new_state; break;
             case KEY_N: self->keys['N'] = new_state; break;
-            case KEY_M: self->keys['M'] = new_state; break;                             
+            case KEY_M: self->keys['M'] = new_state; break;
+            case KEY_SPACE: self->keys[' '] = new_state; break;                             
             }
         }
     }
@@ -197,6 +196,8 @@ void config_terminal(engine* self) {
 
     tcsetattr(STDOUT_FILENO, TCSANOW, &altered_terminal);
 #endif
+
+    fflush(stdout);
 }
 
 void restore_terminal(engine* self) {

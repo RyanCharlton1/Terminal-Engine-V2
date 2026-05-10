@@ -4,9 +4,9 @@
 #include <stdlib.h>
 
 camera* init_camera() {
-    camera* out = (camera*)malloc(sizeof(camera));
+    camera* out = (camera*)calloc(1, sizeof(camera));
 
-    if (!out) { printf("malloc failed: init_camera\n"); return NULL; }
+    if (!out) { fprintf(stderr, "calloc failed: init_camera\n"); return NULL; }
 
     out->pos[0] = 0.0f; out->pos[1] = 0.0f; out->pos[2] =  0.0f;
     out->dir[0] = 0.0f; out->dir[1] = 0.0f; out->dir[2] = -1.0f;

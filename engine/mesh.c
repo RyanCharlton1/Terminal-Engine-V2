@@ -114,30 +114,28 @@ void rasterise(triangle* t, context* cont, texture* text) {
 }
 
 mesh* init_mesh() {
-    mesh* out = (mesh*)malloc(sizeof(mesh));
+    mesh* out = (mesh*)calloc(1, sizeof(mesh));
 
-    if (!out) { fprintf(stderr, "malloc failed: init_mesh\n"); return NULL; }
-
-    memset(out, 0, sizeof(mesh));
-    out->trans.scale[0] = 1.0f;
-    out->trans.scale[1] = 1.0f;
-    out->trans.scale[2] = 1.0f;
+    if (!out) { fprintf(stderr, "calloc failed: init_mesh\n"); return NULL; }
 
     return out;
 }
 
 void free_mesh(mesh* m) {
+    if (m->tris) { free(m->tris); }
+    // if (m->text) { free(m->text); }
+
     free(m);
 }
 
-void draw_mesh(mesh *m, context *cont, camera* cam) {
+void draw_mesh(mesh *m, context *cont, transform *trans, camera *cam) {
     mat4 proj, view, model;
 
     glm_perspective_default((float)WIDTH / (float)HEIGHT, proj);
     camera_view(cam, view);
-    transform_mat4(model, &m->trans);
+    transform_mat4(model, trans);
 
-    for (int i = 0; i < m->model_size; i++) {
+    for (int i = 0; i < m->mesh_size; i++) {
         triangle t = m->tris[i];
 
         triangle model_t = apply_transform(model, &t);

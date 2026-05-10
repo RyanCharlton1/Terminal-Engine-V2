@@ -40,21 +40,19 @@ int inside_triangle(float alpha, float beta, float gamma);
 
 void rasterise(triangle* t, context* cont, texture* text);
 
-// model and texture are shared resources that need to managed separately
-// multiple meshes may reuse the same textures or models
+// A model section shaded with texture text, single texture may be shared
+// by multiple meshes and is memory managed by parent model
 typedef struct _mesh {
     triangle* tris;
     texture*  text;
 
-    unsigned int model_size;
-
-    transform trans;
+    unsigned int mesh_size;
 } mesh;
 
 mesh* init_mesh();
 void  free_mesh(mesh* m);
 
 // Apply transformations to mesh and draw to cont
-void draw_mesh(mesh *m, context *cont, camera* cam);
+void draw_mesh(mesh *m, context *cont, transform *trans, camera *cam);
 
 #endif
